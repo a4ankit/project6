@@ -14,7 +14,7 @@ job-definition: &jobdef
                     export SFDX_AUTOUPDATE_DISABLE=true
                     export SFDX_USE_GENERIC_UNIX_KEYCHAIN=true
                     export SFDX_DOMAIN_RETRY=300
-                    npm install sfdx-cli@6.8.2
+                    npm install sfdx-cli@6.22.1-022a4908f1
                     node_modules/sfdx-cli/bin/run --version
                     node_modules/sfdx-cli/bin/run plugins --core
                 fi
@@ -25,12 +25,12 @@ job-definition: &jobdef
         - run: 
             name: Create Scratch Org
             command: |
-                node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid $CONSUMERKEY --jwtkeyfile assets/server.key --username $USERNAME --setdefaultdevhubusername -a DevhubOrg
+                node_modules/sfdx-cli/bin/run force:auth:jwt:grant --clientid $CONSUMERKEY --jwtkeyfile assets/server.key --username $USERNAME 			--setdefaultdevhubusername -a DevhubOrg
                 echo "Creating scratch org with definition $SCRATCH_DEF"
                 node_modules/sfdx-cli/bin/run force:org:create -v DevhubOrg -s -f "config/$SCRATCH_DEF" -a scratch
         - run:
             name: Remove Server Key
-            when: always
+            when: always	
             command: |
                 rm assets/server.key
         - run:
@@ -52,11 +52,6 @@ job-definition: &jobdef
             command: | 
                 mkdir ~/tests/lightning
                 node_modules/sfdx-cli/bin/run force:lightning:test:run -d ~/tests/lightning -r human -a septaTrainsTests.app -o
-        - run: 
-            name: Push to Codecov.io
-            command: |
-                cp ~/tests/apex/test-result-codecoverage.json .
-                bash <(curl -s https://codecov.io/bash)
         - run: 
             name: Clean Up
             when: always
@@ -90,10 +85,7 @@ jobs:
           key: pmd-v6.0.1
           paths: 
               - pmd-bin-6.0.1
-      - run: 
-          name: Run Static Analysis
-          command: |
-              pmd-bin-6.0.1/bin/run.sh pmd -d . -R $RULESET -f text -l apex -r static-analysis.txt 
+      
       - store_artifacts:
           path: static-analysis.txt
   build-enterprise:
@@ -105,4 +97,6 @@ workflows:
   test_and_static:
     jobs:
       - build-enterprise
+
       - static-analysis
+
