@@ -52,12 +52,7 @@ job-definition: &jobdef
             command: | 
                 mkdir ~/tests/lightning
                 node_modules/sfdx-cli/bin/run force:lightning:test:run -d ~/tests/lightning -r human -a septaTrainsTests.app -o
-        - run: 
-            name: Clean Up
-            when: always
-            command: |
-                node_modules/sfdx-cli/bin/run force:org:delete -u scratch -p
-                rm ~/tests/apex/*.txt ~/tests/apex/test-result-7*.json
+
         - store_artifacts:
             path: ~/tests
         - store_test_results:
@@ -97,6 +92,5 @@ workflows:
   test_and_static:
     jobs:
       - build-enterprise
-
       - static-analysis
 
